@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"testing"
 	"time"
 
@@ -36,7 +35,6 @@ func TestCore(t *testing.T) {
 
 	logger = logger.Named("testing")
 
-	// logger = logger.With(zap.String("field_one", "one"), zap.Int8("field_two", 2))
 	logger = logger.With(zapotel.Resource(r))
 
 	logger = logger.With(zap.Duration("seconds", time.Millisecond*1450))
@@ -46,9 +44,7 @@ func TestCore(t *testing.T) {
 		zap.String("field_one", "one"), zap.Int8("field_two", 2),
 	)
 
-	logger.Sync()
-
-	fmt.Println(buf.String())
+	require.NoError(t, logger.Sync())
 
 	want := Entry{
 		ScopeName:    "testing",
@@ -79,17 +75,17 @@ func TestCore(t *testing.T) {
 // based on
 // https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/f531a708efce0e43cc4e999fd66f5ee7411e9c0e/pkg/stanza/entry/entry.go
 type Entry struct {
-	ObservedTimestamp int64                  `json:"observed_timestamp,omitempty"      yaml:"observed_timestamp"`
-	Timestamp         int64                  `json:"timestamp"               yaml:"timestamp"`
 	Body              interface{}            `json:"body"                    yaml:"body"`
 	Attributes        map[string]interface{} `json:"attributes,omitempty"    yaml:"attributes,omitempty"`
 	Resource          map[string]interface{} `json:"resource,omitempty"      yaml:"resource,omitempty"`
 	SeverityText      string                 `json:"severity_text,omitempty" yaml:"severity_text,omitempty"`
+	ScopeName         string                 `json:"scope_name"              yaml:"scope_name"`
 	SpanID            []byte                 `json:"span_id,omitempty"       yaml:"span_id,omitempty"`
 	TraceID           []byte                 `json:"trace_id,omitempty"      yaml:"trace_id,omitempty"`
 	TraceFlags        []byte                 `json:"trace_flags,omitempty"   yaml:"trace_flags,omitempty"`
+	ObservedTimestamp int64                  `json:"observed_timestamp,omitempty"      yaml:"observed_timestamp"`
+	Timestamp         int64                  `json:"timestamp"               yaml:"timestamp"`
 	Severity          int                    `json:"severity"                yaml:"severity"`
-	ScopeName         string                 `json:"scope_name"              yaml:"scope_name"`
 }
 
 func BenchmarkCore(b *testing.B) {

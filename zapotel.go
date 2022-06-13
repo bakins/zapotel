@@ -144,7 +144,6 @@ func (c *Core) Write(e zapcore.Entry, in []zapcore.Field) error {
 			}
 
 			attributes = append(attributes, *f)
-
 		}
 	}
 
