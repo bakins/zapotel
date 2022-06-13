@@ -104,29 +104,32 @@ func (c *Core) Write(e zapcore.Entry, in []zapcore.Field) error {
 		resource *zap.Field
 	)
 
-	out := make([]zap.Field, 0, len(in)+3+len(c.fields))
+	// this tries to avoid allocations. may need additional tuning.
+
+	length := len(in) + 3 + len(c.fields)
+	out := make([]zap.Field, 0, length)
 	out = append(out, zap.String("body", e.Message))
 	out = append(out, zap.Int("severity", levelToSeverity(e.Level)))
 
-	var attributes []zap.Field
+	attributes := make([]zap.Field, 0, length)
 
 	// this is a bit ugly. find our "special" fields
 	for _, fields := range [][]zapcore.Field{c.fields, in} {
 	FIELDS:
 		for i := range fields {
-			f := fields[i]
+			f := &fields[i]
 
 			switch f.Type {
 			case zapcore.InlineMarshalerType:
 				switch f.Key {
 				case spanIDKey:
 					if _, ok := f.Interface.(spanIDWrapper); ok {
-						spanID = &f
+						spanID = f
 						continue FIELDS
 					}
 				case traceIDKey:
 					if _, ok := f.Interface.(traceIDWrapper); ok {
-						traceID = &f
+						traceID = f
 						continue FIELDS
 					}
 				}
@@ -134,13 +137,13 @@ func (c *Core) Write(e zapcore.Entry, in []zapcore.Field) error {
 			case zapcore.ObjectMarshalerType:
 				if f.Key == resourceKey {
 					if _, ok := f.Interface.(resourceWrapper); ok {
-						resource = &f
+						resource = f
 						continue FIELDS
 					}
 				}
 			}
 
-			attributes = append(attributes, f)
+			attributes = append(attributes, *f)
 
 		}
 	}

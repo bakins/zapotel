@@ -112,6 +112,8 @@ func BenchmarkCore(b *testing.B) {
 	logger = logger.Named("testing")
 	logger = logger.With(zapotel.Resource(r))
 
+	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
 		logger.Info(
 			"testing 1234",
