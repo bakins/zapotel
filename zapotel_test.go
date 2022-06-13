@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -23,6 +24,7 @@ func TestCore(t *testing.T) {
 	c := zapotel.NewCore(zapcore.AddSync(&buf), zapcore.DebugLevel)
 	logger := zap.New(c)
 
+	resource.Environment()
 	r, err := resource.New(
 		context.Background(),
 		resource.WithAttributes(
@@ -45,6 +47,8 @@ func TestCore(t *testing.T) {
 	)
 
 	require.NoError(t, logger.Sync())
+
+	fmt.Println(buf.String())
 
 	want := Entry{
 		ScopeName:    "testing",
