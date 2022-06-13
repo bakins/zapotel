@@ -1,5 +1,7 @@
 # zapotel
 
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/bakins/zapotel)](https://pkg.go.dev/github.com/bakins/zapotel)
+
 [Zap](https://github.com/uber-go/zap) helpers for writing [opentelemetry formatted logs](https://opentelemetry.io/docs/reference/specification/logs/data-model/).
 
 ## Installation
